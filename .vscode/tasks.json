@@ -5,13 +5,13 @@
 			"label": "pip install (functions)",
 			"type": "shell",
 			"osx": {
-				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
+				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt && ${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt --target='.python_packages/lib/site-packages' --upgrade"
 			},
 			"windows": {
-				"command": "${config:azureFunctions.pythonVenv}/Scripts/python -m pip install -r requirements.txt"
+				"command": "${config:azureFunctions.pythonVenv}/Scripts/python -m pip install -r requirements.txt && ${config:azureFunctions.pythonVenv}/Scripts/python -m pip install -r requirements.txt --target=\".python_packages/lib/site-packages\" --upgrade"
 			},
 			"linux": {
-				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
+				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt && ${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt --target='.python_packages/lib/site-packages' --upgrade"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}/src"
@@ -25,7 +25,10 @@
 			"problemMatcher": "$func-python-watch",
 			"isBackground": true,
 			"options": {
-				"cwd": "${workspaceFolder}/src"
+				"cwd": "${workspaceFolder}/src",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}/src/.python_packages/lib/site-packages"
+				}
 			},
 			"dependsOn": "func: extensions install"
 		},
