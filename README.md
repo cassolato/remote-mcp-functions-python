@@ -50,24 +50,52 @@ An Azure Storage Emulator is needed for this particular sample because we will s
 
 ## Run your MCP Server locally from the terminal
 
-1. Change to the src folder in a new terminal window:
+1. Change to the `src` folder in a new terminal window:
 
    ```shell
    cd src
    ```
 
-1. Install Python dependencies:
+1. Install Python dependencies to the `.python_packages` directory so the Azure Functions worker can resolve them at runtime:
 
    ```shell
-   pip install -r requirements.txt
+   pip install -r requirements.txt --target=".python_packages/lib/site-packages"
    ```
 
->**Note** it is a best practice to create a Virtual Environment before doing the `pip install` to avoid dependency issues/collisions, or if you are running in CodeSpaces.  See [Python Environments in VS Code](https://code.visualstudio.com/docs/python/environments#_creating-environments) for more information.
+   > **Note:** It is a best practice to create a virtual environment before installing packages to avoid dependency collisions, especially in Codespaces. See [Python Environments in VS Code](https://code.visualstudio.com/docs/python/environments#_creating-environments) for more information.
+
+1. Set the `PYTHONPATH` environment variable so the Azure Functions Python worker loads the correct `azure-functions` package version (with MCP decorator support) instead of the older version bundled with Azure Functions Core Tools:
+
+   **Windows (PowerShell):**
+
+   ```powershell
+   $env:PYTHONPATH = ".python_packages/lib/site-packages"
+   ```
+
+   **macOS / Linux:**
+
+   ```bash
+   export PYTHONPATH=".python_packages/lib/site-packages"
+   ```
+
+   > **Why is this needed?** As of February 2026, no version of Azure Functions Core Tools (up to v4.7.0) bundles an `azure-functions` package with full MCP decorator support. The Core Tools Python worker ships with `azure-functions` v1.24.x, which does not include the `@app.mcp_tool()`, `@app.mcp_tool_property()`, or `@app.mcp_resource_trigger()` decorators introduced in v1.25.0b2. Setting `PYTHONPATH` ensures the worker resolves the correct version from `requirements.txt` instead of its bundled copy. The VS Code tasks in this repo already include this configuration automatically when using F5 to debug. Once a future Core Tools release bundles `azure-functions >= 1.25.0`, this workaround can be removed.
 
 1. Start the Functions host locally:
 
    ```shell
    func start
+   ```
+
+   You should see all functions indexed successfully:
+
+   ```
+   Functions:
+
+           get_snippet: mcpToolTrigger
+           get_weather: mcpToolTrigger
+           get_weather_widget: mcpResourceTrigger
+           hello_mcp: mcpToolTrigger
+           save_snippet: mcpToolTrigger
    ```
 
 > **Note** by default this will use the webhooks route: `/runtime/webhooks/mcp`.  Later we will use this in Azure to set the key on client/host calls: `/runtime/webhooks/mcp?code=<system_key>`
@@ -79,7 +107,7 @@ An Azure Storage Emulator is needed for this particular sample because we will s
 1. **Add MCP Server** from command palette and add URL to your running Function app's MCP endpoint:
 
     ```shell
-    http://0.0.0.0:7071/runtime/webhooks/mcp
+    http://localhost:7071/runtime/webhooks/mcp
     ```
 
 1. **List MCP Servers** from command palette and start the server
@@ -114,7 +142,7 @@ An Azure Storage Emulator is needed for this particular sample because we will s
 4. Set the URL to your running Function app's MCP endpoint and **Connect**:
 
     ```shell
-    http://0.0.0.0:7071/runtime/webhooks/mcp
+    http://localhost:7071/runtime/webhooks/mcp
     ```
 
 >**Note** this step will not work in CodeSpaces.  Please move on to Deploy to Remote MCP.  
@@ -209,7 +237,7 @@ For GitHub Copilot within VS Code, you should instead set the key as the `x-func
         },
         "local-mcp-function": {
             "type": "http",
-            "url": "http://0.0.0.0:7071/runtime/webhooks/mcp"
+            "url": "http://localhost:7071/runtime/webhooks/mcp"
         }
     }
 }
@@ -373,10 +401,19 @@ This creates a bundled `src/app/dist/index.html` file that the function serves.
 
 #### 2. Run the Function App
 
-In the `src` directory, run: 
+In the `src` directory, set `PYTHONPATH` and run the function app:
+
+**Windows (PowerShell):**
+
+```powershell
+$env:PYTHONPATH = ".python_packages/lib/site-packages"
+func start
+```
+
+**macOS / Linux:**
 
 ```bash
-func start
+PYTHONPATH=".python_packages/lib/site-packages" func start
 ```
 
 The MCP server will be available at `http://localhost:7071/runtime/webhooks/mcp`.
