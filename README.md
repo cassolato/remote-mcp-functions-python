@@ -35,6 +35,19 @@ Below is the architecture diagram for the Remote MCP Server using Azure Function
   + [Visual Studio Code](https://code.visualstudio.com/)
   + [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
 
+## Run locally with GitHub Copilot (single prompt)
+
+If you have [GitHub Copilot](https://github.com/features/copilot) in VS Code with agent mode enabled, you can start the entire project with a single prompt. This was tested with **GitHub Copilot using the Claude Opus 4.6 model**.
+
+1. Open Copilot chat in **agent mode**
+2. Enter the following prompt:
+
+    ```plaintext
+    Run the project locally
+    ```
+
+Copilot will automatically read the repo's [copilot-instructions.md](.github/copilot-instructions.md), start Azurite, install dependencies, and launch the Functions host — no manual steps required.
+
 ## Prepare your local environment
 
 An Azure Storage Emulator is needed for this particular sample because we will save and get snippets from blob storage.
@@ -42,7 +55,7 @@ An Azure Storage Emulator is needed for this particular sample because we will s
 1. Start Azurite
 
     ```shell
-    docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
+    docker run -d -p 10000:10000 -p 10001:10001 -p 10002:10002 \
         mcr.microsoft.com/azure-storage/azurite
     ```
 
